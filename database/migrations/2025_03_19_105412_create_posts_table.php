@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained();
+            $table->string('title', 255);
+            $table->string('slug', 255)->unique();
+            $table->text('content');
+            $table->enum('status', ['draft', 'published']);
+            $table->timestamp('published_at')->nullable();
+            $table->json('seo_meta')->nullable();
             $table->timestamps();
         });
     }
