@@ -13,12 +13,12 @@ trait ApiResponseTrait
         ], $code);
     }
 
-    protected function errorResponse($data = [], $message = 'Error', $code = 400)
+    protected function errorResponse($errors = [], $message = 'Error', $code = 400)
     {
         return response()->json([
             'success' => false,
             'message' => $message,
-            'data' => $data,
+            'errors' => $errors,
         ], $code);
     }
 }
