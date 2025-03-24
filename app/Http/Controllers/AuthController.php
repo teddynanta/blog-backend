@@ -22,13 +22,20 @@ class AuthController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
+     * Register a newly created resource in storage.
      */
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = $this->authRepository->register(($request->validated()));
-
         return $this->successResponse(new UserResource(($user)), 'Account Created!', 201);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function me(Request $request): JsonResponse
+    {
+        return $this->successResponse(new UserResource($request->user()), 'User Details');
     }
 
     /**
@@ -37,10 +44,10 @@ class AuthController extends Controller
     public function login(LoginRequest $request): JsonResponse
     {
         $user = $this->authRepository->login(($request->validated()));
-
-        if (!$user) {
-            return $this->errorResponse([], 'Invalid Credentials', 401);
-        }
+        // dd($user);
+        // if (!$user) {
+        //     return $this->errorResponse([], 'Invalid Credentials', 401);
+        // }
 
         return $this->successResponse(['token' => $user], 'Successfully logged in!');
     }
@@ -50,7 +57,7 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $user = $this->authRepository->logout($request);
         return $this->successResponse([], 'Successfully logged out!');
     }
 }
