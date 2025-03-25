@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\ApiResponseTrait;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -18,20 +19,13 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        if ($exceptions instanceof ValidationException) {
-            return $this->errorResponse(
-                $exceptions->errors(),
-                'Validation Error',
-                422
-            );
-        }
-        $exceptions->shouldRenderJsonWhen(function (Request $request, Throwable $e) {
+        $exceptions->render(function (RouteNotFoundException $e, Request $request) {
             if ($request->is('api/*')) {
-                return true;
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthenticated',
+                    'error'   => $e->getMessage(),
+                ]);
             }
-
-
-
-            return $request->expectsJson();
         });
     })->create();

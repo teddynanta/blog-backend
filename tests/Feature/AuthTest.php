@@ -19,7 +19,7 @@ class AuthTest extends TestCase
     public function test_user_can_register()
     {
         Role::factory(2)->create();
-        $response = $this->post('/api/register', [
+        $response = $this->postJson('/api/register', [
             'name' => 'User Test',
             'email' => 'user99@test.com',
             'password' => 'password',
@@ -43,7 +43,7 @@ class AuthTest extends TestCase
     public function test_user_cannot_register()
     {
         Role::factory(2)->create();
-        $response = $this->post('/api/register', [
+        $response = $this->postJson('/api/register', [
             'name' => 'User Test',
             'email' => 'user99',
             'password' => 'pass',
@@ -60,7 +60,7 @@ class AuthTest extends TestCase
     public function test_user_can_login()
     {
         $this->seed();
-        $response = $this->post('/api/login', [
+        $response = $this->postJson('/api/login', [
             'email' => User::first()->email,
             'password' => 'password',
         ]);
@@ -77,11 +77,11 @@ class AuthTest extends TestCase
     public function test_user_cannot_login_invalid_creds()
     {
         $this->seed();
-        $response = $this->post('/api/login', [
+        $response = $this->postJson('/api/login', [
             'email' => 'apaitu@email.com',
             'password' => 'pas',
         ]);
-        Log::info(($response->json()));
+        // Log::info(($response->json()));
         $response->assertStatus(401)
             ->assertJsonStructure([
                 'success',
@@ -93,11 +93,11 @@ class AuthTest extends TestCase
     public function test_user_cannot_login_validation_error()
     {
         $this->seed();
-        $response = $this->post('/api/login', [
+        $response = $this->postJson('/api/login', [
             'email' => 'error',
             'password' => 'pas',
         ]);
-        Log::info(($response->json()));
+        // Log::info(($response->json()));
         $response->assertStatus(422)
             ->assertJsonStructure([
                 'success',
@@ -109,12 +109,17 @@ class AuthTest extends TestCase
     public function test_user_already_logged_in()
     {
         $this->seed();
-        $response = $this->post('/api/login', [
-            'email' => 'error',
-            'password' => 'pas',
+        $response = $this->postJson('/api/login', [
+            'email' => User::first()->email,
+            'password' => 'password',
+        ]);
+
+        $response = $this->postJson('/api/login', [
+            'email' => User::first()->email,
+            'password' => 'password',
         ]);
         Log::info(($response->json()));
-        $response->assertStatus(422)
+        $response->assertStatus(403)
             ->assertJsonStructure([
                 'success',
                 'message',

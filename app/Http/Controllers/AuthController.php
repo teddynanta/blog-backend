@@ -44,12 +44,13 @@ class AuthController extends Controller
     public function login(LoginRequest $request): JsonResponse
     {
         $user = $this->authRepository->login(($request->validated()));
-        // dd($user);
-        // if (!$user) {
-        //     return $this->errorResponse([], 'Invalid Credentials', 401);
-        // }
 
-        return $this->successResponse(['token' => $user], 'Successfully logged in!');
+        if (!$user) {
+            return $this->errorResponse([], 'Invalid Credentials', 401);
+        } elseif ($user === 'already_logged_in') {
+            return $this->errorResponse([], 'User already logged in', 403);
+        }
+        return $this->successResponse(['token' => $user], 'Login Success', 200);
     }
 
     /**
@@ -57,7 +58,7 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $user = $this->authRepository->logout($request);
+        $this->authRepository->logout($request);
         return $this->successResponse([], 'Successfully logged out!');
     }
 }
