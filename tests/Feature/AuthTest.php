@@ -118,12 +118,44 @@ class AuthTest extends TestCase
             'email' => User::first()->email,
             'password' => 'password',
         ]);
-        Log::info(($response->json()));
+        // Log::info(($response->json()));
         $response->assertStatus(403)
             ->assertJsonStructure([
                 'success',
                 'message',
                 'errors' => [],
+            ]);
+    }
+
+    public function test_user_can_get_user_details()
+    {
+        $this->seed();
+        $response = $this->actingAs(User::first())->getJson('/api/me');
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'data' => [
+                    'id',
+                    'name',
+                    'email',
+                    'role',
+                    'avatar'
+                ]
+            ]);
+        // Log::info($response->json());
+    }
+
+    public function test_user_cannot_get_user_details()
+    {
+        $this->seed();
+        $response = $this->getJson('/api/me');
+        Log::info($response->json());
+        $response->assertStatus(401)
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'error' => []
             ]);
     }
 }
